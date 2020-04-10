@@ -5,26 +5,28 @@
 #include "westmere/intrinsics.h"
 
 TARGET_WESTMERE
-namespace simdjson::westmere {
+namespace simdjson {
+namespace westmere {
 
-#ifndef _MSC_VER
-// We sometimes call trailing_zero on inputs that are zero,
-// but the algorithms do not end up using the returned value.
-// Sadly, sanitizers are not smart enough to figure it out.
-__attribute__((no_sanitize("undefined")))  // this is deliberate
-#endif
+#ifdef _MSC_VER
 /* result might be undefined when input_num is zero */
 really_inline int trailing_zeroes(uint64_t input_num) {
-#ifdef _MSC_VER
   unsigned long ret;
   // Search the mask data from least significant bit (LSB) 
   // to the most significant bit (MSB) for a set bit (1).
   _BitScanForward64(&ret, input_num);
   return (int)ret;
-#else
-  return __builtin_ctzll(input_num);
-#endif// _MSC_VER
 }
+#else // _MSC_VER
+/* result might be undefined when input_num is zero */
+// We sometimes call trailing_zero on inputs that are zero,
+// but the algorithms do not end up using the returned value.
+// Sadly, sanitizers are not smart enough to figure it out. 
+__attribute__((no_sanitize("undefined"))) // this is deliberate
+really_inline int trailing_zeroes(uint64_t input_num) {
+  return __builtin_ctzll(input_num);
+}
+#endif // _MSC_VER
 
 /* result might be undefined when input_num is zero */
 really_inline uint64_t clear_lowest_bit(uint64_t input_num) {
@@ -81,7 +83,9 @@ really_inline bool mul_overflow(uint64_t value1, uint64_t value2,
 #endif
 }
 
-} // namespace simdjson::westmere
+} // namespace westmere
+
+} // namespace simdjson
 UNTARGET_REGION
 
 #endif // SIMDJSON_WESTMERE_BITMANIPULATION_H

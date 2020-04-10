@@ -86,15 +86,28 @@ if(NOT (MSVC AND MSVC_VERSION LESS 1920))
 
   add_compile_test(readme_examples11 readme_examples.cpp quicktests)
   set_target_properties(readme_examples11 PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-  target_compile_options(readme_examples11 PRIVATE -Werror)
+  if (!MSVC)
+    target_compile_options(readme_examples11 PRIVATE -Werror)
+  endif()
+
   add_compile_test(readme_examples_noexceptions11 readme_examples_noexceptions.cpp quicktests)
   set_target_properties(readme_examples_noexceptions11 PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-  target_compile_options(readme_examples_noexceptions11 PRIVATE -Werror)
+  if (!MSVC)
+    target_compile_options(readme_examples11 PRIVATE -Werror)
+  endif()
 
   # Compile tests that *should fail*
   add_compile_test(readme_examples_will_fail_with_exceptions_off readme_examples.cpp quicktests)
   target_compile_definitions(readme_examples_will_fail_with_exceptions_off PRIVATE SIMDJSON_EXCEPTIONS=0)
   set_tests_properties(readme_examples_will_fail_with_exceptions_off PROPERTIES WILL_FAIL TRUE)
+endif()
+
+# Copy the simdjson dll into the tests directory
+if(MSVC)
+  add_custom_command(TARGET basictests POST_BUILD        # Adds a post-build event
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
+        "$<TARGET_FILE:simdjson>"      # <--this is in-file
+        "$<TARGET_FILE_DIR:basictests>")                 # <--this is out-file path
 endif()
 
 ## Next bit should not be needed!

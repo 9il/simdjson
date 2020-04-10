@@ -3,7 +3,8 @@
 
 #include "simdjson.h"
 
-namespace simdjson::dom {
+namespace simdjson {
+namespace dom {
 
 //
 // Parser callbacks
@@ -121,6 +122,7 @@ really_inline void parser::annotate_previous_loc(uint32_t saved_loc, uint64_t va
   doc.tape[saved_loc] |= val;
 }
 
-} // namespace simdjson::dom
+} // namespace simdjson
+} // namespace dom
 
 #endif // SIMDJSON_DOCUMENT_PARSER_CALLBACKS_H
